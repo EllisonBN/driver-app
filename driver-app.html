@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CARGO מסירה">
+<meta name="theme-color" content="#F5F8FC">
+<title>אישור מסירה — CARGO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root{
+    --ink:#14213D; --paper:#F5F8FC; --accent:#1479E0; --accent-dark:#0F5FB8;
+    --ok:#2F8F5B; --line:#DCE6F0; --muted:#64748B;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; background:var(--paper); color:var(--ink);
+    font-family:'Rubik', system-ui, sans-serif;
+    display:flex; flex-direction:column; align-items:center; padding:24px 16px 48px;
+  }
+  .wrap{width:100%; max-width:440px}
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:28px; justify-content:center}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+  .brand span{font-weight:800; letter-spacing:.5px; font-size:15px; color:var(--muted)}
+  .card{background:#fff; border:1px solid var(--line); border-radius:18px; padding:22px; margin-bottom:14px}
+  label{display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px}
+  input[type=text],input[type=email],input[type=password]{
+    width:100%; padding:14px; border-radius:12px; border:1px solid var(--line);
+    font-family:inherit; font-size:16px; margin-bottom:16px; background:var(--paper);
+  }
+  .primary{
+    width:100%; padding:16px; border:none; border-radius:14px; background:var(--accent);
+    color:#fff; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;
+  }
+  .primary:active{background:var(--accent-dark)}
+  .errbox{
+    background:#FDEDEA; color:#B23A17; border-radius:10px; padding:10px 14px;
+    font-size:13.5px; margin-bottom:14px; display:none;
+  }
+  .errbox.show{display:block}
+  .step{border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:14px; background:#fff}
+  .step h3{margin:0 0 4px; font-size:16px; font-weight:700}
+  .step p{margin:0 0 14px; font-size:13.5px; color:var(--muted); line-height:1.5}
+  .filebtn{
+    display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+    padding:15px; border-radius:12px; border:2px dashed var(--line); background:var(--paper);
+    font-family:inherit; font-size:15px; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .filebtn.done{border-style:solid; border-color:var(--ok); background:#F1FAF5; color:var(--ok)}
+  input[type=file]{display:none}
+  .thumb{margin-top:12px; width:100%; max-height:200px; object-fit:cover; border-radius:12px; display:none}
+  .thumb.show{display:block}
+  .scan-row{display:flex; gap:8px}
+  .scan-row input{flex:1}
+  .scanbtn{width:52px; border-radius:12px; border:1px solid var(--line); background:var(--paper); font-size:20px; cursor:pointer}
+  #scanner-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:50; display:none;
+    flex-direction:column; align-items:center; justify-content:center; padding:20px;
+  }
+  #scanner-overlay.show{display:flex}
+  #reader{width:100%; max-width:400px; border-radius:16px; overflow:hidden}
+  .close-scan{margin-top:16px; padding:12px 24px; border-radius:12px; border:none; background:#fff; font-weight:700; font-family:inherit}
+  .topbar{width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px}
+  .topbar .name{font-weight:700; font-size:14px}
+  .topbar button{background:none; border:none; color:var(--muted); font-size:13px; text-decoration:underline; font-family:inherit}
+  .msg{text-align:center; padding:50px 20px; display:none}
+  .msg.show{display:block}
+  .stamp{
+    width:78px; height:78px; border-radius:50%; margin:0 auto 16px; border:3px solid var(--ok);
+    display:flex; align-items:center; justify-content:center; color:var(--ok); font-size:34px;
+  }
+  .spinner{width:32px; height:32px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:spin .8s linear infinite; margin:0 auto 16px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .msg h2{margin:0 0 6px; font-size:18px}
+  .msg p{margin:0; color:var(--muted); font-size:14px}
+  [data-screen]{display:none; width:100%}
+  [data-screen].show{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span><span>CARGO · אישור מסירה</span></div>
+
+  <div data-screen="loading" class="msg show"><div class="spinner"></div><p>טוען…</p></div>
+
+  <!-- LOGIN -->
+  <div data-screen="login">
+    <div class="card">
+      <div class="errbox" id="loginErr"></div>
+      <label>אימייל</label>
+      <input type="email" id="loginEmail" autocomplete="username">
+      <label>סיסמה</label>
+      <input type="password" id="loginPass" autocomplete="current-password">
+      <button class="primary" id="loginBtn">כניסה</button>
+    </div>
+  </div>
+
+  <!-- MAIN FORM -->
+  <div data-screen="main">
+    <div class="topbar">
+      <span class="name" id="driverLabel"></span>
+      <button id="logoutBtn">התנתקות</button>
+    </div>
+
+    <div class="step">
+      <h3>1. סריקת ברקוד המשלוח</h3>
+      <p>סרקו את הברקוד או הקלידו את מספר המשלוח ידנית</p>
+      <div class="scan-row">
+        <input type="text" id="shipmentInput" placeholder="מספר משלוח">
+        <button class="scanbtn" id="scanBtn" type="button">📷</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>2. תמונת המשלוח בדלת</h3>
+      <p>צילום של החבילה במקום ההשארה</p>
+      <button class="filebtn" id="doorBtn" type="button">📷 צילום תמונה</button>
+      <input type="file" id="doorInput" accept="image/*" capture="environment">
+      <img class="thumb" id="doorThumb">
+    </div>
+
+    <div class="step">
+      <h3>3. צילום מסך אישור וואטסאפ</h3>
+      <p>צילום המסך של אישור הלקוח/ה בוואטסאפ</p>
+      <button class="filebtn" id="approvalBtn" type="button">🖼️ בחירת תמונה</button>
+      <input type="file" id="approvalInput" accept="image/*">
+      <img class="thumb" id="approvalThumb">
+    </div>
+
+    <div class="errbox" id="submitErr"></div>
+    <button class="primary" id="submitBtn">שליחת אישור מסירה</button>
+  </div>
+
+  <div data-screen="uploading" class="msg"><div class="spinner"></div><p>שולח…</p></div>
+  <div data-screen="success" class="msg">
+    <div class="stamp">✓</div>
+    <h2>נשלח בהצלחה</h2>
+    <p>אישור המסירה למשלוח <b id="successNum"></b> נקלט במערכת.</p>
+    <button class="primary" id="nextBtn" style="margin-top:20px">משלוח הבא</button>
+  </div>
+</div>
+
+<div id="scanner-overlay">
+  <div id="reader"></div>
+  <button class="close-scan" id="closeScan">סגירה</button>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import {
+    getFirestore, doc, getDoc
+  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: 'AIzaSyAg8xDchkrdiaTmTTiteYcwsw5P76pHYfQ',
+    authDomain: 'cargo-deliveries.firebaseapp.com',
+    projectId: 'cargo-deliveries',
+    storageBucket: 'cargo-deliveries.firebasestorage.app',
+    messagingSenderId: '1077240894775',
+    appId: '1:1077240894775:web:3ccdfe0ff8fe515a62f6b2'
+  };
+
+  // ⚠️ Replace with your deployed Apps Script Web App /exec URL
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8tHd_bS_zGaj6Qdkdz1dFXwagqEiwN84eJL31bLmMQdade9uTd6W9UYPdrG09ER2w/exec';
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const els = id => document.getElementById(id);
+  const showScreen = name => {
+    document.querySelectorAll('[data-screen]').forEach(s => s.classList.toggle('show', s.dataset.screen === name));
+  };
+
+  let currentDriverName = '';
+
+  // Firebase Auth persists the session on the device automatically —
+  // no manual token/localStorage handling needed.
+  onAuthStateChanged(auth, async user => {
+    if (!user) { showScreen('login'); return; }
+    try {
+      const snap = await getDoc(doc(db, 'drivers', user.email.toLowerCase()));
+      currentDriverName = snap.exists() ? (snap.data().name || user.email) : user.email;
+    } catch (e) {
+      currentDriverName = user.email;
+    }
+    els('driverLabel').textContent = currentDriverName;
+    showScreen('main');
+  });
+
+  els('loginBtn').onclick = async () => {
+    const email = els('loginEmail').value.trim();
+    const password = els('loginPass').value;
+    els('loginErr').classList.remove('show');
+    if (!email || !password) return;
+
+    els('loginBtn').textContent = 'בודק…';
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+      els('loginErr').textContent = 'אימייל או סיסמה שגויים.';
+      els('loginErr').classList.add('show');
+    }
+    els('loginBtn').textContent = 'כניסה';
+  };
+
+  els('logoutBtn').onclick = () => signOut(auth);
+
+  // ---------- Barcode scanner ----------
+  let html5QrCode;
+  els('scanBtn').onclick = () => {
+    els('scanner-overlay').classList.add('show');
+    html5QrCode = new Html5Qrcode('reader');
+    html5QrCode.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: 250 },
+      decodedText => { els('shipmentInput').value = decodedText; stopScanner(); }
+    ).catch(() => {
+      alert('לא ניתן לגשת למצלמה. הזינו את המספר ידנית.');
+      stopScanner();
+    });
+  };
+  function stopScanner(){
+    if (html5QrCode) html5QrCode.stop().catch(()=>{});
+    els('scanner-overlay').classList.remove('show');
+  }
+  els('closeScan').onclick = stopScanner;
+
+  // ---------- Photo capture (resized/compressed client-side before sending) ----------
+  let doorData = null, approvalData = null;
+
+  function resizeAndEncode(file, cb){
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; };
+    img.onload = () => {
+      const maxDim = 1600;
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width *= scale; height *= scale;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      cb({ mimeType: 'image/jpeg', data: dataUrl.split(',')[1] }, dataUrl);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  els('doorBtn').onclick = () => els('doorInput').click();
+  els('approvalBtn').onclick = () => els('approvalInput').click();
+
+  els('doorInput').onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    resizeAndEncode(f, (payload, preview) => {
+      doorData = payload;
+      els('doorThumb').src = preview; els('doorThumb').classList.add('show');
+      els('doorBtn').classList.add('done'); els('doorBtn').textContent = '✓ תמונה נבחרה — לשינוי לחצו שוב';
+    });
+  };
+  els('approvalInput').onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    resizeAndEncode(f, (payload, preview) => {
+      approvalData = payload;
+      els('approvalThumb').src = preview; els('approvalThumb').classList.add('show');
+      els('approvalBtn').classList.add('done'); els('approvalBtn').textContent = '✓ תמונה נבחרה — לשינוי לחצו שוב';
+    });
+  };
+
+  // ---------- Submit — sends the driver's verified Firebase ID token
+  // to Apps Script, which re-checks it with Google before saving anything ----------
+  els('submitBtn').onclick = async () => {
+    const shipment = els('shipmentInput').value.trim();
+    els('submitErr').classList.remove('show');
+
+    if (!shipment || !doorData || !approvalData) {
+      els('submitErr').textContent = 'נא למלא מספר משלוח ושתי התמונות.';
+      els('submitErr').classList.add('show');
+      return;
+    }
+
+    showScreen('uploading');
+    try {
+      const idToken = await auth.currentUser.getIdToken();
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          idToken, driverName: currentDriverName, shipment,
+          doorPhoto: doorData, approvalPhoto: approvalData
+        })
+      }).then(r => r.json());
+
+      if (res.ok) {
+        els('successNum').textContent = shipment;
+        showScreen('success');
+      } else {
+        showScreen('main');
+        els('submitErr').textContent = res.message || 'השליחה נכשלה, נסו שוב.';
+        els('submitErr').classList.add('show');
+      }
+    } catch (e) {
+      showScreen('main');
+      els('submitErr').textContent = 'השליחה נכשלה, נסו שוב.';
+      els('submitErr').classList.add('show');
+    }
+  };
+
+  els('nextBtn').onclick = () => {
+    els('shipmentInput').value = '';
+    doorData = null; approvalData = null;
+    els('doorThumb').classList.remove('show'); els('approvalThumb').classList.remove('show');
+    els('doorBtn').classList.remove('done'); els('doorBtn').textContent = '📷 צילום תמונה';
+    els('approvalBtn').classList.remove('done'); els('approvalBtn').textContent = '🖼️ בחירת תמונה';
+    showScreen('main');
+  };
+</script>
+</body>
+</html>
