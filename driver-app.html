@@ -1,102 +1,195 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0050)file:///Users/adamsaya/Downloads/driver-app_8.html -->
+<html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CARGO מסירה">
-<meta name="theme-color" content="#F5F8FC">
+<meta name="theme-color" content="#F6F8FB">
 <title>אישור מסירה — CARGO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./אישור מסירה — CARGO_files/css2" rel="stylesheet">
+<script src="./אישור מסירה — CARGO_files/html5-qrcode.min.js"></script>
 <style>
   :root{
-    --ink:#14213D; --paper:#F5F8FC; --accent:#1479E0; --accent-dark:#0F5FB8;
-    --ok:#2F8F5B; --line:#DCE6F0; --muted:#64748B;
+    --ink:#101828; --ink-soft:#344054; --muted:#667085;
+    --paper:#F6F8FB; --surface:#FFFFFF;
+    --line:#E4E7EC; --line-strong:#D0D5DD;
+    --accent:#1570EF; --accent-dark:#175CD3; --accent-tint:#EFF6FF;
+    --ok:#12B76A; --ok-tint:#ECFDF3;
+    --err:#F04438; --err-tint:#FEF3F2;
+    --radius-lg:18px; --radius-md:14px; --radius-sm:10px;
+    --shadow-card: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
+    --shadow-pop: 0 4px 8px rgba(16,24,40,.06), 0 12px 24px rgba(16,24,40,.08);
   }
-  *{box-sizing:border-box}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   body{
     margin:0; min-height:100vh; background:var(--paper); color:var(--ink);
     font-family:'Rubik', system-ui, sans-serif;
-    display:flex; flex-direction:column; align-items:center; padding:24px 16px 48px;
+    display:flex; flex-direction:column; align-items:center; padding:28px 16px 48px;
   }
-  .wrap{width:100%; max-width:440px}
-  .brand{display:flex; align-items:center; gap:10px; margin-bottom:28px; justify-content:center}
-  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
-  .brand span{font-weight:800; letter-spacing:.5px; font-size:15px; color:var(--muted)}
-  .card{background:#fff; border:1px solid var(--line); border-radius:18px; padding:22px; margin-bottom:14px}
-  label{display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px}
+  body.centered{ justify-content:center; padding-top:16px; padding-bottom:16px; }
+  .wrap{width:100%; max-width:420px}
+
+  .brand{display:flex; align-items:center; justify-content:center; gap:9px; margin-bottom:26px}
+  .brand-mark{
+    width:26px; height:26px; border-radius:8px; background:var(--accent);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .brand-mark svg{width:15px; height:15px}
+  .brand span{font-weight:700; font-size:14px; color:var(--ink-soft); letter-spacing:.2px}
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:26px 22px; margin-bottom:14px; box-shadow:var(--shadow-card);
+  }
+
+  label{display:block; font-size:12.5px; font-weight:600; color:var(--muted); margin-bottom:7px; letter-spacing:.1px}
+  .field{position:relative; margin-bottom:16px}
+  .field svg{position:absolute; top:50%; right:14px; transform:translateY(-50%); width:18px; height:18px; color:var(--muted); pointer-events:none}
   input[type=text],input[type=email],input[type=password]{
-    width:100%; padding:14px; border-radius:12px; border:1px solid var(--line);
-    font-family:inherit; font-size:16px; margin-bottom:16px; background:var(--paper);
+    width:100%; padding:13px 42px 13px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--line);
+    font-family:inherit; font-size:15.5px; background:var(--surface); color:var(--ink);
+    transition:border-color .15s;
   }
+  input:focus{outline:none; border-color:var(--accent)}
+  .field input{margin-bottom:0}
+
   .primary{
-    width:100%; padding:16px; border:none; border-radius:14px; background:var(--accent);
-    color:#fff; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;
+    width:100%; padding:15px; border:none; border-radius:var(--radius-md); background:var(--accent);
+    color:#fff; font-family:inherit; font-size:15.5px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:background .15s, transform .1s;
   }
-  .primary:active{background:var(--accent-dark)}
+  .primary:active{background:var(--accent-dark); transform:scale(.99)}
+  .primary:disabled{opacity:.55; pointer-events:none}
+
   .errbox{
-    background:#FDEDEA; color:#B23A17; border-radius:10px; padding:10px 14px;
-    font-size:13.5px; margin-bottom:14px; display:none;
+    background:var(--err-tint); color:#B42318; border-radius:var(--radius-sm); padding:11px 14px;
+    font-size:13.5px; margin-bottom:14px; display:none; font-weight:500;
   }
   .errbox.show{display:block}
-  .step{border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:14px; background:#fff}
-  .step h3{margin:0 0 4px; font-size:16px; font-weight:700}
-  .step p{margin:0 0 14px; font-size:13.5px; color:var(--muted); line-height:1.5}
-  .filebtn{
-    display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
-    padding:15px; border-radius:12px; border:2px dashed var(--line); background:var(--paper);
-    font-family:inherit; font-size:15px; font-weight:600; color:var(--ink); cursor:pointer;
+
+  .step{border:1px solid var(--line); border-radius:var(--radius-lg); padding:18px; margin-bottom:12px; background:var(--surface); box-shadow:var(--shadow-card)}
+  .step-head{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+  .step-num{
+    width:24px; height:24px; border-radius:50%; background:var(--accent-tint); color:var(--accent);
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;
   }
-  .filebtn.done{border-style:solid; border-color:var(--ok); background:#F1FAF5; color:var(--ok)}
-  input[type=file]{display:none}
-  .thumb{margin-top:12px; width:100%; max-height:200px; object-fit:cover; border-radius:12px; display:none}
-  .thumb.show{display:block}
+  .step-num.done{background:var(--ok-tint); color:var(--ok)}
+  .step h3{margin:0; font-size:15px; font-weight:700; color:var(--ink)}
+  .step p.hint{margin:0 0 12px 34px; font-size:13px; color:var(--muted); line-height:1.5}
+
   .scan-row{display:flex; gap:8px}
-  .scan-row input{flex:1}
-  .scanbtn{width:52px; border-radius:12px; border:1px solid var(--line); background:var(--paper); font-size:20px; cursor:pointer}
+  .scan-row .field{flex:1; margin-bottom:0}
+  .scanbtn{
+    width:48px; height:48px; border-radius:var(--radius-sm); border:1.5px solid var(--line);
+    background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .scanbtn svg{width:20px; height:20px; color:var(--ink-soft)}
+  .scanbtn:active{background:var(--paper)}
+
+  .filebtn{
+    display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+    padding:14px; border-radius:var(--radius-sm); border:1.5px dashed var(--line-strong); background:var(--paper);
+    font-family:inherit; font-size:14.5px; font-weight:600; color:var(--ink-soft); cursor:pointer;
+  }
+  .filebtn svg{width:18px; height:18px}
+  .filebtn.done{border-style:solid; border-color:var(--ok); background:var(--ok-tint); color:var(--ok)}
+  input[type=file]{display:none}
+  .thumb{margin-top:10px; width:100%; max-height:190px; object-fit:cover; border-radius:var(--radius-sm); display:none}
+  .thumb.show{display:block}
+
   #scanner-overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:50; display:none;
+    position:fixed; inset:0; background:rgba(16,24,40,.92); z-index:50; display:none;
     flex-direction:column; align-items:center; justify-content:center; padding:20px;
   }
   #scanner-overlay.show{display:flex}
-  #reader{width:100%; max-width:400px; border-radius:16px; overflow:hidden}
-  .close-scan{margin-top:16px; padding:12px 24px; border-radius:12px; border:none; background:#fff; font-weight:700; font-family:inherit}
+  #reader{width:100%; max-width:380px; border-radius:16px; overflow:hidden}
+  .scan-hint{color:#fff; opacity:.75; font-size:13px; margin-top:14px; text-align:center}
+  .close-scan{
+    margin-top:16px; padding:12px 28px; border-radius:var(--radius-sm); border:none; background:#fff;
+    font-weight:700; font-family:inherit; font-size:14px; display:flex; align-items:center; gap:8px;
+  }
+  .close-scan svg{width:16px; height:16px}
+
   .topbar{width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px}
-  .topbar .name{font-weight:700; font-size:14px}
-  .topbar button{background:none; border:none; color:var(--muted); font-size:13px; text-decoration:underline; font-family:inherit}
-  .msg{text-align:center; padding:50px 20px; display:none}
+  .topbar .name{font-weight:700; font-size:14.5px; color:var(--ink)}
+  .topbar button{
+    background:none; border:none; color:var(--muted); font-size:13px; font-family:inherit;
+    display:flex; align-items:center; gap:5px; cursor:pointer;
+  }
+  .topbar button svg{width:14px; height:14px}
+
+  .pending-pill{
+    display:none; align-items:center; gap:8px; background:var(--accent-tint); color:var(--accent-dark);
+    padding:9px 14px; border-radius:999px; font-size:12.5px; font-weight:600; margin-bottom:14px; width:fit-content;
+  }
+  .pending-pill.show{display:flex}
+  .pending-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .retry-banner{
+    display:none; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--err-tint); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:14px;
+  }
+  .retry-banner.show{display:flex}
+  .retry-banner span{font-size:13px; color:#B42318; font-weight:500}
+  .retry-banner button{
+    background:#fff; border:1px solid #F0AEA9; color:#B42318; font-size:12.5px; font-weight:700;
+    padding:7px 12px; border-radius:8px; font-family:inherit; cursor:pointer; flex-shrink:0;
+  }
+
+  .msg{text-align:center; padding:56px 20px; display:none}
   .msg.show{display:block}
   .stamp{
-    width:78px; height:78px; border-radius:50%; margin:0 auto 16px; border:3px solid var(--ok);
-    display:flex; align-items:center; justify-content:center; color:var(--ok); font-size:34px;
+    width:72px; height:72px; border-radius:50%; margin:0 auto 18px;
+    display:flex; align-items:center; justify-content:center;
   }
-  .spinner{width:32px; height:32px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:spin .8s linear infinite; margin:0 auto 16px}
+  .stamp.ok{background:var(--ok-tint)}
+  .stamp.ok svg{width:32px; height:32px; color:var(--ok)}
+  .stamp.err{background:var(--err-tint)}
+  .stamp.err svg{width:32px; height:32px; color:var(--err)}
+  .spinner{
+    width:30px; height:30px; border-radius:50%; border:3px solid var(--line);
+    border-top-color:var(--accent); animation:spin .8s linear infinite; margin:0 auto 16px;
+  }
   @keyframes spin{to{transform:rotate(360deg)}}
-  .msg h2{margin:0 0 6px; font-size:18px}
+  .msg h2{margin:0 0 6px; font-size:18px; font-weight:700}
   .msg p{margin:0; color:var(--muted); font-size:14px}
+
   [data-screen]{display:none; width:100%}
   [data-screen].show{display:block}
 </style>
 </head>
-<body>
+<body class="centered">
 <div class="wrap">
-  <div class="brand"><span class="dot"></span><span>CARGO · אישור מסירה</span></div>
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M21 8L12 3L3 8M21 8L12 13M21 8V16L12 21M12 13L3 8M12 13V21M3 8V16L12 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </div>
+    <span>CARGO · אישור מסירה</span>
+  </div>
 
-  <div data-screen="loading" class="msg show"><div class="spinner"></div><p>טוען…</p></div>
+  <div data-screen="loading" class="msg"><div class="spinner"></div><p>טוען…</p></div>
 
   <!-- LOGIN -->
-  <div data-screen="login">
+  <div data-screen="login" class="show">
     <div class="card">
       <div class="errbox" id="loginErr"></div>
       <label>אימייל</label>
-      <input type="email" id="loginEmail" autocomplete="username">
+      <div class="field">
+        <input type="email" id="loginEmail" autocomplete="username">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 6.5L11.03 12.34a2 2 0 0 0 1.94 0L21 6.5M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
       <label>סיסמה</label>
-      <input type="password" id="loginPass" autocomplete="current-password">
+      <div class="field" style="margin-bottom:20px">
+        <input type="password" id="loginPass" autocomplete="current-password">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+      </div>
       <button class="primary" id="loginBtn">כניסה</button>
     </div>
   </div>
@@ -105,30 +198,58 @@
   <div data-screen="main">
     <div class="topbar">
       <span class="name" id="driverLabel"></span>
-      <button id="logoutBtn">התנתקות</button>
+      <button id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        התנתקות
+      </button>
+    </div>
+
+    <div class="pending-pill" id="pendingPill"><span class="dot"></span><span id="pendingText">שולח 0 משלוחים…</span></div>
+    <div class="retry-banner" id="retryBanner">
+      <span id="retryText"></span>
+      <button id="retryBtn">נסה שוב</button>
     </div>
 
     <div class="step">
-      <h3>1. סריקת ברקוד המשלוח</h3>
-      <p>סרקו את הברקוד או הקלידו את מספר המשלוח ידנית</p>
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <h3>סריקת ברקוד המשלוח</h3>
+      </div>
+      <p class="hint">סרקו את הברקוד או הקלידו את מספר המשלוח ידנית</p>
       <div class="scan-row">
-        <input type="text" id="shipmentInput" placeholder="מספר משלוח">
-        <button class="scanbtn" id="scanBtn" type="button">📷</button>
+        <div class="field">
+          <input type="text" id="shipmentInput" placeholder="מספר משלוח">
+        </div>
+        <button class="scanbtn" id="scanBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M11 8v8M14 8v8M17 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
       </div>
     </div>
 
     <div class="step">
-      <h3>2. תמונת המשלוח בדלת</h3>
-      <p>צילום של החבילה במקום ההשארה</p>
-      <button class="filebtn" id="doorBtn" type="button">📷 צילום תמונה</button>
+      <div class="step-head">
+        <div class="step-num" id="doorNum">2</div>
+        <h3>תמונת המשלוח בדלת</h3>
+      </div>
+      <p class="hint">צילום של החבילה במקום ההשארה</p>
+      <button class="filebtn" id="doorBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .83-.45l.94-1.4a1 1 0 0 1 .83-.45h4.4a1 1 0 0 1 .83.45l.94 1.4a1 1 0 0 0 .83.45H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.7"></circle></svg>
+        <span id="doorBtnText">צילום תמונה</span>
+      </button>
       <input type="file" id="doorInput" accept="image/*" capture="environment">
       <img class="thumb" id="doorThumb">
     </div>
 
     <div class="step">
-      <h3>3. צילום מסך אישור וואטסאפ</h3>
-      <p>צילום המסך של אישור הלקוח/ה בוואטסאפ</p>
-      <button class="filebtn" id="approvalBtn" type="button">🖼️ בחירת תמונה</button>
+      <div class="step-head">
+        <div class="step-num" id="approvalNum">3</div>
+        <h3>צילום מסך אישור וואטסאפ</h3>
+      </div>
+      <p class="hint">צילום המסך של אישור הלקוח/ה בוואטסאפ</p>
+      <button class="filebtn" id="approvalBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8.5" cy="9" r="1.3" fill="currentColor"></circle><path d="M21 15l-5-4-4.5 3.5L8 12l-5 4" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg>
+        <span id="approvalBtnText">בחירת תמונה</span>
+      </button>
       <input type="file" id="approvalInput" accept="image/*">
       <img class="thumb" id="approvalThumb">
     </div>
@@ -137,18 +258,23 @@
     <button class="primary" id="submitBtn">שליחת אישור מסירה</button>
   </div>
 
-  <div data-screen="uploading" class="msg"><div class="spinner"></div><p>שולח…</p></div>
   <div data-screen="success" class="msg">
-    <div class="stamp">✓</div>
+    <div class="stamp ok">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </div>
     <h2>נשלח בהצלחה</h2>
     <p>אישור המסירה למשלוח <b id="successNum"></b> נקלט במערכת.</p>
-    <button class="primary" id="nextBtn" style="margin-top:20px">משלוח הבא</button>
+    <button class="primary" id="nextBtn" style="margin-top:22px">משלוח הבא</button>
   </div>
 </div>
 
 <div id="scanner-overlay">
   <div id="reader"></div>
-  <button class="close-scan" id="closeScan">סגירה</button>
+  <p class="scan-hint">כוונו את הברקוד למרכז המסגרת</p>
+  <button class="close-scan" id="closeScan">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+    סגירה
+  </button>
 </div>
 
 <script type="module">
@@ -169,7 +295,6 @@
     appId: '1:1077240894775:web:3ccdfe0ff8fe515a62f6b2'
   };
 
-  // ⚠️ Replace with your deployed Apps Script Web App /exec URL
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8tHd_bS_zGaj6Qdkdz1dFXwagqEiwN84eJL31bLmMQdade9uTd6W9UYPdrG09ER2w/exec';
 
   const app = initializeApp(firebaseConfig);
@@ -177,14 +302,14 @@
   const db = getFirestore(app);
 
   const els = id => document.getElementById(id);
+  const CENTERED_SCREENS = ['loading', 'login', 'success'];
   const showScreen = name => {
     document.querySelectorAll('[data-screen]').forEach(s => s.classList.toggle('show', s.dataset.screen === name));
+    document.body.classList.toggle('centered', CENTERED_SCREENS.includes(name));
   };
 
   let currentDriverName = '';
 
-  // Firebase Auth persists the session on the device automatically —
-  // no manual token/localStorage handling needed.
   onAuthStateChanged(auth, async user => {
     if (!user) { showScreen('login'); return; }
     try {
@@ -195,6 +320,7 @@
     }
     els('driverLabel').textContent = currentDriverName;
     showScreen('main');
+    renderQueueStatus();
   });
 
   els('loginBtn').onclick = async () => {
@@ -203,27 +329,42 @@
     els('loginErr').classList.remove('show');
     if (!email || !password) return;
 
-    els('loginBtn').textContent = 'בודק…';
+    els('loginBtn').disabled = true;
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
       els('loginErr').textContent = 'אימייל או סיסמה שגויים.';
       els('loginErr').classList.add('show');
     }
-    els('loginBtn').textContent = 'כניסה';
+    els('loginBtn').disabled = false;
   };
 
   els('logoutBtn').onclick = () => signOut(auth);
 
-  // ---------- Barcode scanner ----------
+  // ---------- Barcode scanner (real 1D barcodes, not just QR) ----------
   let html5QrCode;
   els('scanBtn').onclick = () => {
     els('scanner-overlay').classList.add('show');
     html5QrCode = new Html5Qrcode('reader');
+    const formats = [
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E,
+      Html5QrcodeSupportedFormats.ITF,
+      Html5QrcodeSupportedFormats.QR_CODE
+    ];
     html5QrCode.start(
       { facingMode: 'environment' },
-      { fps: 10, qrbox: 250 },
-      decodedText => { els('shipmentInput').value = decodedText; stopScanner(); }
+      {
+        fps: 12,
+        qrbox: { width: 300, height: 140 }, // wide box suits linear barcodes
+        formatsToSupport: formats,
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+      },
+      decodedText => { els('shipmentInput').value = decodedText.trim(); stopScanner(); }
     ).catch(() => {
       alert('לא ניתן לגשת למצלמה. הזינו את המספר ידנית.');
       stopScanner();
@@ -235,15 +376,15 @@
   }
   els('closeScan').onclick = stopScanner;
 
-  // ---------- Photo capture (resized/compressed client-side before sending) ----------
-  let doorData = null, approvalData = null;
+  // ---------- Photo capture (compressed harder for faster upload) ----------
+  let doorFile = null, approvalFile = null;
 
   function resizeAndEncode(file, cb){
     const img = new Image();
     const reader = new FileReader();
     reader.onload = e => { img.src = e.target.result; };
     img.onload = () => {
-      const maxDim = 1600;
+      const maxDim = 1280;
       let { width, height } = img;
       if (width > maxDim || height > maxDim) {
         const scale = maxDim / Math.max(width, height);
@@ -252,7 +393,7 @@
       const canvas = document.createElement('canvas');
       canvas.width = width; canvas.height = height;
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.62);
       cb({ mimeType: 'image/jpeg', data: dataUrl.split(',')[1] }, dataUrl);
     };
     reader.readAsDataURL(file);
@@ -264,66 +405,133 @@
   els('doorInput').onchange = e => {
     const f = e.target.files[0]; if (!f) return;
     resizeAndEncode(f, (payload, preview) => {
-      doorData = payload;
+      doorFile = payload;
       els('doorThumb').src = preview; els('doorThumb').classList.add('show');
-      els('doorBtn').classList.add('done'); els('doorBtn').textContent = '✓ תמונה נבחרה — לשינוי לחצו שוב';
+      els('doorBtn').classList.add('done'); els('doorBtnText').textContent = 'תמונה נבחרה — לשינוי לחצו שוב';
+      els('doorNum').classList.add('done'); els('doorNum').innerHTML = checkMark();
     });
   };
   els('approvalInput').onchange = e => {
     const f = e.target.files[0]; if (!f) return;
     resizeAndEncode(f, (payload, preview) => {
-      approvalData = payload;
+      approvalFile = payload;
       els('approvalThumb').src = preview; els('approvalThumb').classList.add('show');
-      els('approvalBtn').classList.add('done'); els('approvalBtn').textContent = '✓ תמונה נבחרה — לשינוי לחצו שוב';
+      els('approvalBtn').classList.add('done'); els('approvalBtnText').textContent = 'תמונה נבחרה — לשינוי לחצו שוב';
+      els('approvalNum').classList.add('done'); els('approvalNum').innerHTML = checkMark();
     });
   };
+  function checkMark(){
+    return '<svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
 
-  // ---------- Submit — sends the driver's verified Firebase ID token
-  // to Apps Script, which re-checks it with Google before saving anything ----------
-  els('submitBtn').onclick = async () => {
-    const shipment = els('shipmentInput').value.trim();
-    els('submitErr').classList.remove('show');
+  // ---------- Non-blocking submission queue ----------
+  // Tapping submit hands the upload off to a background queue and lets the
+  // driver move to the next parcel immediately — it doesn't sit and wait for
+  // the network round trip. Failed items retry automatically with backoff;
+  // the queue survives an app reload via localStorage.
 
-    if (!shipment || !doorData || !approvalData) {
-      els('submitErr').textContent = 'נא למלא מספר משלוח ושתי התמונות.';
-      els('submitErr').classList.add('show');
-      return;
+  function loadQueue(){ try { return JSON.parse(localStorage.getItem('pod_queue') || '[]'); } catch(e){ return []; } }
+  function saveQueue(q){ localStorage.setItem('pod_queue', JSON.stringify(q)); }
+
+  function renderQueueStatus(){
+    const q = loadQueue();
+    const pending = q.filter(i => i.status !== 'failed').length;
+    const failed = q.filter(i => i.status === 'failed');
+
+    els('pendingPill').classList.toggle('show', pending > 0);
+    els('pendingText').textContent = pending === 1 ? 'שולח משלוח 1…' : `שולח ${pending} משלוחים…`;
+
+    els('retryBanner').classList.toggle('show', failed.length > 0);
+    if (failed.length) {
+      els('retryText').textContent = failed.length === 1
+        ? `משלוח ${failed[0].shipment} לא נשלח`
+        : `${failed.length} משלוחים לא נשלחו`;
     }
+  }
 
-    showScreen('uploading');
+  async function processQueue(){
+    const q = loadQueue();
+    const next = q.find(i => i.status === 'pending');
+    if (!next) return;
+
     try {
       const idToken = await auth.currentUser.getIdToken();
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({
-          idToken, driverName: currentDriverName, shipment,
-          doorPhoto: doorData, approvalPhoto: approvalData
+          idToken, driverName: next.driverName, shipment: next.shipment,
+          doorPhoto: next.doorPhoto, approvalPhoto: next.approvalPhoto
         })
       }).then(r => r.json());
 
+      const q2 = loadQueue();
+      const idx = q2.findIndex(i => i.id === next.id);
       if (res.ok) {
-        els('successNum').textContent = shipment;
-        showScreen('success');
-      } else {
-        showScreen('main');
-        els('submitErr').textContent = res.message || 'השליחה נכשלה, נסו שוב.';
-        els('submitErr').classList.add('show');
+        if (idx > -1) q2.splice(idx, 1);
+      } else if (idx > -1) {
+        q2[idx].status = 'failed';
+        q2[idx].message = res.message || 'שליחה נכשלה';
       }
+      saveQueue(q2);
     } catch (e) {
-      showScreen('main');
-      els('submitErr').textContent = 'השליחה נכשלה, נסו שוב.';
-      els('submitErr').classList.add('show');
+      const q2 = loadQueue();
+      const idx = q2.findIndex(i => i.id === next.id);
+      if (idx > -1) { q2[idx].attempts = (q2[idx].attempts || 0) + 1;
+        if (q2[idx].attempts >= 3) q2[idx].status = 'failed';
+      }
+      saveQueue(q2);
     }
+    renderQueueStatus();
+    processQueue(); // keep draining
+  }
+
+  els('retryBtn').onclick = () => {
+    const q = loadQueue().map(i => i.status === 'failed' ? { ...i, status: 'pending', attempts: 0 } : i);
+    saveQueue(q);
+    renderQueueStatus();
+    processQueue();
+  };
+
+  els('submitBtn').onclick = () => {
+    const shipment = els('shipmentInput').value.trim();
+    els('submitErr').classList.remove('show');
+
+    if (!shipment || !doorFile || !approvalFile) {
+      els('submitErr').textContent = 'נא למלא מספר משלוח ושתי התמונות.';
+      els('submitErr').classList.add('show');
+      return;
+    }
+
+    const q = loadQueue();
+    q.push({
+      id: `${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      shipment, driverName: currentDriverName,
+      doorPhoto: doorFile, approvalPhoto: approvalFile,
+      status: 'pending', attempts: 0
+    });
+    saveQueue(q);
+
+    els('successNum').textContent = shipment;
+    showScreen('success');
+    renderQueueStatus();
+    processQueue();
   };
 
   els('nextBtn').onclick = () => {
     els('shipmentInput').value = '';
-    doorData = null; approvalData = null;
+    doorFile = null; approvalFile = null;
     els('doorThumb').classList.remove('show'); els('approvalThumb').classList.remove('show');
-    els('doorBtn').classList.remove('done'); els('doorBtn').textContent = '📷 צילום תמונה';
-    els('approvalBtn').classList.remove('done'); els('approvalBtn').textContent = '🖼️ בחירת תמונה';
+    els('doorBtn').classList.remove('done'); els('doorBtnText').textContent = 'צילום תמונה';
+    els('approvalBtn').classList.remove('done'); els('approvalBtnText').textContent = 'בחירת תמונה';
+    els('doorNum').classList.remove('done'); els('doorNum').textContent = '2';
+    els('approvalNum').classList.remove('done'); els('approvalNum').textContent = '3';
+    els('submitBtn').textContent = 'שליחת אישור מסירה';
     showScreen('main');
   };
+
+  // Resume any queued submissions from a previous session on load
+  window.addEventListener('load', () => { renderQueueStatus(); processQueue(); });
 </script>
-</body>
-</html>
+
+
+</body></html>
