@@ -180,17 +180,27 @@
   <div data-screen="login">
     <div class="card">
       <div class="errbox" id="loginErr"></div>
-      <label>אימייל</label>
-      <div class="field">
-        <input type="email" id="loginEmail" autocomplete="username">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M3 6.5L11.03 12.34a2 2 0 0 0 1.94 0L21 6.5M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+      <div id="phoneStep">
+        <label>מספר טלפון</label>
+        <div class="field" style="margin-bottom:20px">
+          <input type="tel" id="phoneInput" autocomplete="tel" placeholder="05XXXXXXXX" inputmode="numeric">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <button class="primary" id="sendCodeBtn">שליחת קוד</button>
       </div>
-      <label>סיסמה</label>
-      <div class="field" style="margin-bottom:20px">
-        <input type="password" id="loginPass" autocomplete="current-password">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+
+      <div id="codeStep" style="display:none">
+        <label>קוד אימות</label>
+        <div class="field" style="margin-bottom:20px">
+          <input type="tel" id="codeInput" autocomplete="one-time-code" placeholder="123456" inputmode="numeric">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <button class="primary" id="verifyCodeBtn">אישור</button>
+        <button class="primary" id="resendBtn" style="background:transparent; color:var(--muted); margin-top:8px; box-shadow:none">שליחה חוזרת</button>
       </div>
-      <button class="primary" id="loginBtn">כניסה</button>
+
+      <div id="recaptcha-container"></div>
     </div>
   </div>
 
@@ -232,11 +242,18 @@
         <h3>תמונת המשלוח בדלת</h3>
       </div>
       <p class="hint">צילום של החבילה במקום ההשארה</p>
-      <button class="filebtn" id="doorBtn" type="button">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .83-.45l.94-1.4a1 1 0 0 1 .83-.45h4.4a1 1 0 0 1 .83.45l.94 1.4a1 1 0 0 0 .83.45H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.7"/></svg>
-        <span id="doorBtnText">צילום תמונה</span>
-      </button>
+      <div style="display:flex; gap:8px">
+        <button class="filebtn" id="doorBtn" type="button" style="flex:1">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 8a2 2 0 0 1 2-2h1.2a1 1 0 0 0 .83-.45l.94-1.4a1 1 0 0 1 .83-.45h4.4a1 1 0 0 1 .83.45l.94 1.4a1 1 0 0 0 .83.45H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.7"/></svg>
+          <span id="doorBtnText">מצלמה</span>
+        </button>
+        <button class="filebtn" id="doorGalleryBtn" type="button" style="flex:1">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><circle cx="8.5" cy="9" r="1.3" fill="currentColor"/><path d="M21 15l-5-4-4.5 3.5L8 12l-5 4" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <span>גלריה</span>
+        </button>
+      </div>
       <input type="file" id="doorInput" accept="image/*" capture="environment">
+      <input type="file" id="doorGalleryInput" accept="image/*">
       <img class="thumb" id="doorThumb">
     </div>
 
@@ -280,7 +297,8 @@
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
   import {
-    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+    getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut,
+    setPersistence, browserLocalPersistence
   } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
   import {
     getFirestore, doc, getDoc
@@ -299,6 +317,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  setPersistence(auth, browserLocalPersistence).catch(() => {});
   const db = getFirestore(app);
 
   const els = id => document.getElementById(id);
@@ -309,37 +328,106 @@
   };
 
   let currentDriverName = '';
+  let confirmationResult = null;
+  let recaptchaVerifier = null;
+
+  function toE164(local){
+    const digits = String(local || '').replace(/\D/g, '');
+    if (digits.startsWith('972')) return '+' + digits;
+    if (digits.startsWith('0')) return '+972' + digits.slice(1);
+    return '+972' + digits;
+  }
 
   onAuthStateChanged(auth, async user => {
     if (!user) { showScreen('login'); return; }
+
+    // Firebase will happily verify ANY real phone number by SMS — being
+    // logged in does not by itself mean this is an approved CARGO driver.
+    // The Firestore document is the actual gate: only phone numbers we've
+    // deliberately added have one.
+    let snap;
     try {
-      const snap = await getDoc(doc(db, 'drivers', user.email.toLowerCase()));
-      currentDriverName = snap.exists() ? (snap.data().name || user.email) : user.email;
+      snap = await getDoc(doc(db, 'drivers', user.phoneNumber));
     } catch (e) {
-      currentDriverName = user.email;
+      els('loginErr').textContent = 'שגיאה באימות. נסו שוב.';
+      els('loginErr').classList.add('show');
+      await signOut(auth);
+      return;
     }
+
+    if (!snap.exists()) {
+      els('loginErr').textContent = 'מספר הטלפון אינו מזוהה במערכת. פנו לרכז/ת.';
+      els('loginErr').classList.add('show');
+      await signOut(auth);
+      return;
+    }
+
+    currentDriverName = snap.data().name || user.phoneNumber;
     els('driverLabel').textContent = currentDriverName;
     showScreen('main');
     renderQueueStatus();
   });
 
-  els('loginBtn').onclick = async () => {
-    const email = els('loginEmail').value.trim();
-    const password = els('loginPass').value;
-    els('loginErr').classList.remove('show');
-    if (!email || !password) return;
+  function getRecaptcha(){
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
+    }
+    return recaptchaVerifier;
+  }
 
-    els('loginBtn').disabled = true;
+  els('sendCodeBtn').onclick = async () => {
+    const phone = toE164(els('phoneInput').value);
+    els('loginErr').classList.remove('show');
+    if (!els('phoneInput').value.trim()) return;
+
+    if (!navigator.onLine) {
+      els('loginErr').textContent = 'אין חיבור לאינטרנט. יש למצוא קליטה או Wi-Fi כדי להתחבר בפעם הראשונה.';
+      els('loginErr').classList.add('show');
+      return;
+    }
+
+    els('sendCodeBtn').disabled = true;
+    els('sendCodeBtn').textContent = 'שולח…';
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      confirmationResult = await signInWithPhoneNumber(auth, phone, getRecaptcha());
+      document.getElementById('phoneStep').style.display = 'none';
+      document.getElementById('codeStep').style.display = 'block';
     } catch (e) {
-      els('loginErr').textContent = 'אימייל או סיסמה שגויים.';
+      els('loginErr').textContent = 'לא ניתן לשלוח קוד. בדקו את מספר הטלפון ונסו שוב.';
       els('loginErr').classList.add('show');
     }
-    els('loginBtn').disabled = false;
+    els('sendCodeBtn').disabled = false;
+    els('sendCodeBtn').textContent = 'שליחת קוד';
   };
 
-  els('logoutBtn').onclick = () => signOut(auth);
+  els('verifyCodeBtn').onclick = async () => {
+    const code = els('codeInput').value.trim();
+    els('loginErr').classList.remove('show');
+    if (!code || !confirmationResult) return;
+
+    els('verifyCodeBtn').disabled = true;
+    try {
+      await confirmationResult.confirm(code);
+      // onAuthStateChanged above takes over from here.
+    } catch (e) {
+      els('loginErr').textContent = 'קוד שגוי. נסו שוב.';
+      els('loginErr').classList.add('show');
+    }
+    els('verifyCodeBtn').disabled = false;
+  };
+
+  els('resendBtn').onclick = () => {
+    document.getElementById('codeStep').style.display = 'none';
+    document.getElementById('phoneStep').style.display = 'block';
+    els('codeInput').value = '';
+  };
+
+  els('logoutBtn').onclick = () => {
+    document.getElementById('phoneStep').style.display = 'block';
+    document.getElementById('codeStep').style.display = 'none';
+    els('phoneInput').value = ''; els('codeInput').value = '';
+    signOut(auth);
+  };
 
   // ---------- Barcode scanner (real 1D barcodes, not just QR) ----------
   let html5QrCode, scanTimeout;
@@ -410,17 +498,21 @@
   }
 
   els('doorBtn').onclick = () => els('doorInput').click();
+  els('doorGalleryBtn').onclick = () => els('doorGalleryInput').click();
   els('approvalBtn').onclick = () => els('approvalInput').click();
 
-  els('doorInput').onchange = e => {
-    const f = e.target.files[0]; if (!f) return;
+  function handleDoorFile(f){
+    if (!f) return;
     resizeAndEncode(f, (payload, preview) => {
       doorFile = payload;
       els('doorThumb').src = preview; els('doorThumb').classList.add('show');
-      els('doorBtn').classList.add('done'); els('doorBtnText').textContent = 'תמונה נבחרה — לשינוי לחצו שוב';
+      els('doorBtn').classList.add('done'); els('doorGalleryBtn').classList.add('done');
+      els('doorBtnText').textContent = 'תמונה נבחרה';
       els('doorNum').classList.add('done'); els('doorNum').innerHTML = checkMark();
     });
-  };
+  }
+  els('doorInput').onchange = e => handleDoorFile(e.target.files[0]);
+  els('doorGalleryInput').onchange = e => handleDoorFile(e.target.files[0]);
   els('approvalInput').onchange = e => {
     const f = e.target.files[0]; if (!f) return;
     resizeAndEncode(f, (payload, preview) => {
@@ -449,7 +541,9 @@
     const failed = q.filter(i => i.status === 'failed');
 
     els('pendingPill').classList.toggle('show', pending > 0);
-    els('pendingText').textContent = pending === 1 ? 'שולח משלוח 1…' : `שולח ${pending} משלוחים…`;
+    els('pendingText').textContent = !navigator.onLine
+      ? 'אין חיבור לאינטרנט — ישלח אוטומטית כשהחיבור יחזור'
+      : (pending === 1 ? 'שולח משלוח 1…' : `שולח ${pending} משלוחים…`);
 
     els('retryBanner').classList.toggle('show', failed.length > 0);
     if (failed.length) {
@@ -464,8 +558,18 @@
     const next = q.find(i => i.status === 'pending');
     if (!next) return;
 
+    if (!navigator.onLine) {
+      renderQueueStatus();
+      return; // wait for the 'online' event below rather than burning a retry attempt
+    }
+
     try {
-      const idToken = await auth.currentUser.getIdToken();
+      // Force-refresh the token here — this is the one moment we actually
+      // need a live connection, and doing it explicitly (rather than
+      // trusting a possibly-stale cached token) is what makes a delivery
+      // queued hours earlier while offline still submit correctly once
+      // signal returns.
+      const idToken = await auth.currentUser.getIdToken(true);
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -476,9 +580,19 @@
 
       const q2 = loadQueue();
       const idx = q2.findIndex(i => i.id === next.id);
+      const sessionIssue = !res.ok && /session|log in again/i.test(res.message || '');
+
       if (res.ok) {
         if (idx > -1) q2.splice(idx, 1);
+      } else if (idx > -1 && sessionIssue) {
+        q2[idx].sessionRetries = (q2[idx].sessionRetries || 0) + 1;
+        if (q2[idx].sessionRetries >= 15) {
+          q2[idx].status = 'failed';
+          q2[idx].message = 'בעיית התחברות מתמשכת — יש להתנתק ולהתחבר מחדש';
+        }
       } else if (idx > -1) {
+        // A real rejection (bad data, not an approved driver, etc.) —
+        // this is a genuine failure, surface it.
         q2[idx].status = 'failed';
         q2[idx].message = res.message || 'שליחה נכשלה';
       }
@@ -492,7 +606,7 @@
       saveQueue(q2);
     }
     renderQueueStatus();
-    processQueue(); // keep draining
+    setTimeout(processQueue, 1500); // keep draining, with a small pause between attempts
   }
 
   els('retryBtn').onclick = () => {
@@ -531,7 +645,7 @@
     els('shipmentInput').value = '';
     doorFile = null; approvalFile = null;
     els('doorThumb').classList.remove('show'); els('approvalThumb').classList.remove('show');
-    els('doorBtn').classList.remove('done'); els('doorBtnText').textContent = 'צילום תמונה';
+    els('doorBtn').classList.remove('done'); els('doorGalleryBtn').classList.remove('done'); els('doorBtnText').textContent = 'מצלמה';
     els('approvalBtn').classList.remove('done'); els('approvalBtnText').textContent = 'בחירת תמונה';
     els('doorNum').classList.remove('done'); els('doorNum').textContent = '2';
     els('approvalNum').classList.remove('done'); els('approvalNum').textContent = '3';
@@ -540,7 +654,14 @@
   };
 
   // Resume any queued submissions from a previous session on load
-  window.addEventListener('load', () => { renderQueueStatus(); processQueue(); });
+  window.addEventListener('load', () => {
+    renderQueueStatus();
+    processQueue();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    }
+  });
+  window.addEventListener('online', processQueue);
 </script>
 </body>
 </html>
