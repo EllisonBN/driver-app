@@ -416,7 +416,7 @@
       document.getElementById('phoneStep').style.display = 'none';
       document.getElementById('codeStep').style.display = 'block';
     } catch (e) {
-      els('loginErr').textContent = 'לא ניתן לשלוח קוד. בדקו את מספר הטלפון ונסו שוב.';
+      els('loginErr').textContent = 'שגיאה: ' + (e && e.code ? e.code : '') + ' — ' + (e && e.message ? e.message : e);
       els('loginErr').classList.add('show');
     }
     els('sendCodeBtn').disabled = false;
