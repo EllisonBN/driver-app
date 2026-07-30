@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>לוח בקרה — CARGO משלוחים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --ink:#101828; --ink-soft:#344054; --muted:#667085;
+    --paper:#F6F8FB; --surface:#FFFFFF;
+    --line:#E4E7EC; --line-strong:#D0D5DD;
+    --accent:#1570EF; --accent-dark:#175CD3; --accent-tint:#EFF6FF;
+    --err:#F04438; --err-tint:#FEF3F2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; background:var(--paper); color:var(--ink);
+    font-family:'Rubik', system-ui, sans-serif;
+  }
+  .topbar{
+    background:var(--surface); border-bottom:1px solid var(--line); padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:9px}
+  .brand-mark{width:24px; height:24px; border-radius:7px; background:var(--accent); display:flex; align-items:center; justify-content:center}
+  .brand-mark svg{width:14px; height:14px}
+  .brand span{font-weight:700; font-size:14px; color:var(--ink-soft)}
+  .who{display:flex; align-items:center; gap:12px; font-size:13.5px; color:var(--muted)}
+  .who button{background:none; border:none; color:var(--muted); text-decoration:underline; font-family:inherit; cursor:pointer; font-size:13px}
+
+  .wrap{max-width:900px; margin:0 auto; padding:28px 20px 60px}
+
+  [data-screen]{display:none}
+  [data-screen].show{display:block}
+
+  .center-screen{min-height:70vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px}
+  .center-screen p{color:var(--muted); font-size:14px; margin:0}
+
+  .filters{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:18px; margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;
+  }
+  .field{display:flex; flex-direction:column; gap:6px}
+  .field label{font-size:12px; font-weight:600; color:var(--muted)}
+  .field input{
+    padding:10px 12px; border-radius:9px; border:1.5px solid var(--line);
+    font-family:inherit; font-size:14px; min-width:150px;
+  }
+  .field input:focus{outline:none; border-color:var(--accent)}
+  .searchbtn{
+    padding:10px 20px; border:none; border-radius:9px; background:var(--accent); color:#fff;
+    font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;
+  }
+  .searchbtn:active{background:var(--accent-dark)}
+
+  .errbox{background:var(--err-tint); color:#B42318; border-radius:9px; padding:10px 14px; font-size:13.5px; margin-bottom:16px; display:none}
+  .errbox.show{display:block}
+
+  .result-count{font-size:13px; color:var(--muted); margin-bottom:12px}
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:16px 18px; margin-bottom:10px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+  }
+  .card-main{flex:1; min-width:200px}
+  .card-shipment{font-weight:700; font-size:15px; margin-bottom:2px}
+  .card-meta{font-size:13px; color:var(--muted)}
+  .card-photos{display:flex; gap:8px}
+  .card-photos a{
+    display:flex; align-items:center; gap:6px; padding:8px 12px; border-radius:8px;
+    border:1.5px solid var(--line); text-decoration:none; color:var(--ink-soft); font-size:13px; font-weight:600;
+  }
+  .card-photos a:hover{background:var(--paper)}
+  .card-photos svg{width:15px; height:15px}
+
+  .empty{text-align:center; padding:60px 20px; color:var(--muted); font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M21 8L12 3L3 8M21 8L12 13M21 8V16L12 21M12 13L3 8M12 13V21M3 8V16L12 21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span>CARGO · לוח בקרה משלוחים</span>
+  </div>
+  <div class="who" id="whoBox" style="display:none">
+    <span id="whoEmail"></span>
+    <button id="signOutBtn">התנתקות</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div data-screen="login" class="show">
+    <div class="center-screen">
+      <p>התחברות עם חשבון Google של החברה</p>
+      <div id="gsiButton"></div>
+      <div class="errbox" id="loginErr"></div>
+    </div>
+  </div>
+
+  <div data-screen="main">
+    <div class="filters">
+      <div class="field">
+        <label>מספר משלוח</label>
+        <input type="text" id="shipmentFilter" placeholder="לדוגמה 4821">
+      </div>
+      <div class="field">
+        <label>מתאריך</label>
+        <input type="date" id="dateFrom">
+      </div>
+      <div class="field">
+        <label>עד תאריך</label>
+        <input type="date" id="dateTo">
+      </div>
+      <button class="searchbtn" id="searchBtn">חיפוש</button>
+    </div>
+
+    <div class="errbox" id="searchErr"></div>
+    <div class="result-count" id="resultCount"></div>
+    <div id="results"></div>
+  </div>
+
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyukZoOk4Py4st0jgXToCXzm5uko-9BCyuECDFb1MoqThWALkzpDAByjqAgrLIqmVTH/exec';
+  const OAUTH_CLIENT_ID = 'REPLACE_WITH_YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com';
+
+  const els = id => document.getElementById(id);
+  const showScreen = name => {
+    document.querySelectorAll('[data-screen]').forEach(s => s.classList.toggle('show', s.dataset.screen === name));
+  };
+
+  let idToken = null;
+  let userEmail = '';
+
+  window.onload = () => {
+    google.accounts.id.initialize({
+      client_id: OAUTH_CLIENT_ID,
+      callback: onSignIn
+    });
+    google.accounts.id.renderButton(els('gsiButton'), { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' });
+  };
+
+  function onSignIn(response) {
+    idToken = response.credential;
+    const payload = JSON.parse(atob(idToken.split('.')[1]));
+    userEmail = payload.email;
+    els('whoEmail').textContent = userEmail;
+    els('whoBox').style.display = 'flex';
+    showScreen('main');
+    runSearch();
+  }
+
+  els('signOutBtn').onclick = () => {
+    google.accounts.id.disableAutoSelect();
+    idToken = null;
+    els('whoBox').style.display = 'none';
+    showScreen('login');
+  };
+
+  function iconOpen(){
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M14 3h7v7M21 3l-9 9M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  async function runSearch(){
+    els('searchErr').classList.remove('show');
+    els('results').innerHTML = '';
+    els('resultCount').textContent = 'מחפש…';
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'staffQuery',
+          idToken,
+          shipment: els('shipmentFilter').value,
+          dateFrom: els('dateFrom').value,
+          dateTo: els('dateTo').value
+        })
+      }).then(r => r.json());
+
+      if (!res.ok) {
+        els('resultCount').textContent = '';
+        els('searchErr').textContent = res.message || 'שגיאה בטעינת הנתונים.';
+        els('searchErr').classList.add('show');
+        if ((res.message || '').includes('sign in')) { els('signOutBtn').click(); }
+        return;
+      }
+
+      renderResults(res.results);
+    } catch (e) {
+      els('resultCount').textContent = '';
+      els('searchErr').textContent = 'בעיית תקשורת. נסו שוב.';
+      els('searchErr').classList.add('show');
+    }
+  }
+
+  function renderResults(results){
+    els('resultCount').textContent = results.length
+      ? `${results.length} תוצאות`
+      : '';
+
+    if (!results.length) {
+      els('results').innerHTML = '<div class="empty">לא נמצאו משלוחים תואמים</div>';
+      return;
+    }
+
+    els('results').innerHTML = results.map(r => `
+      <div class="card">
+        <div class="card-main">
+          <div class="card-shipment">משלוח ${escapeHtml(r.shipment)}</div>
+          <div class="card-meta">${escapeHtml(r.driverName)} · ${formatDate(r.timestamp)}</div>
+        </div>
+        <div class="card-photos">
+          <a href="${escapeAttr(r.doorPhotoUrl)}" target="_blank" rel="noopener">${iconOpen()} תמונת דלת</a>
+          <a href="${escapeAttr(r.approvalPhotoUrl)}" target="_blank" rel="noopener">${iconOpen()} אישור וואטסאפ</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function formatDate(iso){
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch(e) { return iso; }
+  }
+  function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  els('searchBtn').onclick = runSearch;
+</script>
+</body>
+</html>
