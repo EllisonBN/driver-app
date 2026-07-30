@@ -573,9 +573,10 @@
 
     els('retryBanner').classList.toggle('show', failed.length > 0);
     if (failed.length) {
+      const reason = failed[0].message ? ` (${failed[0].message})` : '';
       els('retryText').textContent = failed.length === 1
-        ? `משלוח ${failed[0].shipment} לא נשלח`
-        : `${failed.length} משלוחים לא נשלחו`;
+        ? `משלוח ${failed[0].shipment} לא נשלח${reason}`
+        : `${failed.length} משלוחים לא נשלחו${reason}`;
     }
   }
 
